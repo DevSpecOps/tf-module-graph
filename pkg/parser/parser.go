@@ -18,6 +18,7 @@ func ParseModules(filename string, src []byte) ([]Module, error) {
 		return nil, diags
 	}
 	body := file.Body
+	// Получаем все блоки модулей
 	content, _, diags := body.PartialContent(&hcl.BodySchema{
 		Blocks: []hcl.BlockHeaderSchema{
 			{
@@ -33,8 +34,14 @@ func ParseModules(filename string, src []byte) ([]Module, error) {
 	for _, block := range content.Blocks {
 		if block.Type == "module" {
 			name := block.Labels[0]
+			// Для получения атрибута source нужно обратиться к телу блока
+			// Используем JustAttributes, чтобы извлечь все атрибуты блока
+			attrs, diags := block.Body.JustAttributes()
+			if diags.HasErrors() {
+				continue
+			}
 			var source string
-			if attr, exists := block.Body.Attributes["source"]; exists {
+			if attr, exists := attrs["source"]; exists {
 				val, diags := attr.Expr.Value(nil)
 				if !diags.HasErrors() && val.Type() == cty.String {
 					source = val.AsString()

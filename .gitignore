@@ -1,0 +1,7 @@
+/bin/
+/tools/
+.idea/
+*.exe
+*.test
+*.out
+coverage.txt
